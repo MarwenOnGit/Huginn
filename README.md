@@ -88,8 +88,14 @@ safe to test. The KQL job also proves the parser still rejects broken fixtures.
   <img alt="replay.yml: 1. drift (deploy identity, terraform plan must be empty), 2. replay as the lab attacker on fresh resources in huginn-lab-rg, 3. cleanup, 4. validate that Microsoft Sentinel raised each expected alert within 30 minutes." src="docs/diagrams/huginn-replay.png">
 </picture>
 
-Four jobs, two identities, no Terraform apply: a plan with any change stops the run before the
-replay. Validation polls `SecurityAlert` and records the time to alert.
+Four jobs, two identities, no Terraform apply. The drift job signs in as the deploy identity and
+runs `terraform plan` on the Sentinel stack; any non-empty plan means the deployed rules no longer
+match git and the run stops before a single replay, so every nightly result is a proof of the
+committed rules. The replay job then switches to the lab attacker and acts on freshly created
+resources, because two of the rules alert only on a **new** (caller, resource) pair and would
+correctly fall silent on the second night against a reused target. A uniquely named resource per
+run keeps the pair new. Cleanup deletes them, and validation polls `SecurityAlert` until each
+expected alert lands, recording the time to alert per rule.
 
 ### Evidence: what Azure really logs
 
@@ -98,8 +104,12 @@ replay. Validation polls `SecurityAlert` and records the time to alert.
   <img alt="evidence.yml: the operator picks operations, the job performs each once as the lab attacker, then capture.py on the operator's laptop reads the rows from Log Analytics, writes redacted JSON to lab-evidence/ and keeps raw rows git-ignored." src="docs/diagrams/huginn-evidence.png">
 </picture>
 
-Started by hand with a list of operations. The redacted rows in `lab-evidence/` are what the rules
-were written from.
+Started by hand with a list of operations. The job performs each one once as the lab attacker, then
+`scripts/evidence/capture.py` reads the resulting rows from Log Analytics, writes a redacted JSON
+file per operation to `lab-evidence/` and keeps the raw rows git-ignored. Those committed rows are
+the ground truth each rule is written against: the exact `OperationNameValue`, which fields are
+populated, and which operations leave no row at all. The blind spots in
+[docs/FENRIR-MAPPING.md](docs/FENRIR-MAPPING.md) are measured here, not assumed.
 
 ### Purple team: a real Fenrir run
 
@@ -108,10 +118,45 @@ were written from.
   <img alt="Purple team: the operator deploys huginn-purple-rg with Terraform by hand (VM, Logic App, Automation, Key Vault, Storage, App Service, Container Registry, Container Instances), runs Fenrir as a dedicated attacker user, every resource sends allLogs and Syslog to Log Analytics, the Activity log adds ARM events, Sentinel runs the rules under test, and the purple scripts query and redact the results into lab-evidence/purple/." src="docs/diagrams/huginn-purple.png">
 </picture>
 
-Written, not yet applied, and never run by CI. `make purple-preflight` proves every log source
-reaches `law-huginn` before Fenrir starts; `make purple-capture` collects every row that mentions
-the run's identities or IP (`union *`) and reports any table that contains a canary secret.
+The diagram above is the run flow. The resource and logging topology of the stack itself, with the
+user-assigned identity attached to every host and the `allLogs` diagnostic setting on eight
+resources plus Syslog, is in the per-stack diagram:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/huginn-purple-stack-dark.png">
+  <img alt="infra/purple: a disposable, fully logged target. A dedicated attacker user has Contributor on the resource group; a user-assigned identity is attached to every host; the storage account exposes listKeys and the Key Vault get/list; all eight resources send allLogs plus the VM's Syslog to law-huginn; preflight.py and capture.py check and redact. Apply, then destroy the same day." src="docs/diagrams/huginn-purple-stack.png">
+</picture>
+
+Written, not yet applied, and never run by CI. One apply stands up `huginn-purple-rg` with one of
+every resource type Fenrir touches (VM for X-08, web app for X-10/X-11, Logic App for X-13,
+container group for X-14, Automation Account for X-15 to X-18, storage for P-12/D-01, registry for
+P-13/D-03, Key Vault for E-27), each sending the `allLogs` category group to `law-huginn` and the VM
+streaming all Syslog facilities through the Azure Monitor Agent. The attacker is a dedicated
+low-privilege user, Contributor on this one resource group only; the user-assigned identity on every
+host is the shape Fenrir extracts tokens for. A `HUGINN-CANARY-` value sits where each real secret
+would, so a canary found in a log proves a stolen secret reached it. `make purple-preflight` proves
+every log source reaches `law-huginn` before Fenrir starts and will not report `READY` until
+data-plane rows land; `make purple-capture` collects every row that mentions the run's identities or
+IP (`union *`), redacts it, and reports any table that contains a canary. This turns the blind-spot
+claims into measured results, one run at a time.
 Steps: [docs/PURPLE-TEAM.md](docs/PURPLE-TEAM.md), design: [ADR 0008](docs/adr/0008-purple-environment.md).
+
+## How the stacks fit together
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/huginn-stacks-dark.png">
+  <img alt="The four Terraform stacks: bootstrap (applied by a person) writes infra/shared/bootstrap.json that every other stack reads and creates the two OIDC app registrations; sentinel creates the workspace, Activity log connector, function, watchlist and rules; lab creates the replay targets that the replay workflow acts on as huginn-lab-attacker; purple is a disposable target that only a person applies. The nightly replay runs a drift plan on sentinel and replays against lab." src="docs/diagrams/huginn-stacks.png">
+</picture>
+
+Four stacks, applied in order. `infra/bootstrap` is applied once by a person: it creates the state
+storage, the resource groups and the two GitHub OIDC app registrations (one for `main`, one scoped
+to the `lab-replay` environment), and writes `infra/shared/bootstrap.json`, which every other stack
+reads. `infra/sentinel` holds the detection side (workspace, Activity log connector, the
+`HuginnActivity` function, the watchlist and the rules) and is applied by hand but planned nightly
+by the drift check. `infra/lab` holds the Fenrir-shaped replay targets that the replay workflow acts
+on as `huginn-lab-attacker`. `infra/purple` is a disposable, fully logged target that only a person
+ever applies. Each stack has its own per-stack diagram in `docs/diagrams/` (`huginn-bootstrap`,
+`huginn-sentinel`, `huginn-lab`, `huginn-purple-stack`).
 
 ## Quick start
 
