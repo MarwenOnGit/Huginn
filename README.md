@@ -158,6 +158,86 @@ on as `huginn-lab-attacker`. `infra/purple` is a disposable, fully logged target
 ever applies. Each stack has its own per-stack diagram in `docs/diagrams/` (`huginn-bootstrap`,
 `huginn-sentinel`, `huginn-lab`, `huginn-purple-stack`).
 
+### Stack reference
+
+| | `infra/bootstrap` | `infra/sentinel` | `infra/lab` | `infra/purple` |
+|---|---|---|---|---|
+| Purpose | foundation: state, resource groups, identities | detection: workspace, Sentinel, rules | targets for the replays and evidence runs | disposable target for one real Fenrir run |
+| State | local, git-ignored | remote, `sentinel.tfstate` | remote, `lab.tfstate` | remote, `purple.tfstate` |
+| Applied by | a person, once (Owner and Global Administrator) | a person, after a reviewed plan | a person, after a reviewed plan | a person, for one run, destroyed the same day |
+| In CI | fmt, validate, tflint, checkov | the same, plus the nightly drift plan | the same, plus the nightly drift plan; replays act on it | fmt, validate, tflint, checkov only |
+| Reads | nothing from the repo | `bootstrap.json`, `detections/`, `functions/`, `watchlists/` | `bootstrap.json` | `bootstrap.json`, the `law-huginn` workspace |
+| Writes to the repo | `infra/shared/bootstrap.json`, `infra/shared/backend.hcl` | nothing | nothing | nothing |
+
+Order: bootstrap, then sentinel, then lab. Purple is optional and needs sentinel, because it sends
+its logs to `law-huginn`. Every stack after bootstrap stops at plan time if `bootstrap.json` is
+missing. `make destroy` goes the other way: purple (if initialised), lab, sentinel; bootstrap is
+kept.
+
+#### `infra/bootstrap`
+
+- **Creates:** the resource groups `huginn-tfstate-rg`, `huginn-sentinel-rg` and `huginn-lab-rg`;
+  the state storage account and container; two app registrations with OIDC federated credentials
+  and no secrets:
+  - `huginn-github-deploy`: trusted for the `main` branch. Contributor on the Sentinel and lab
+    resource groups, Monitoring Contributor on the subscription (Activity log setting only), blob
+    access to the state container. Runs `terraform plan` in CI, never `apply`.
+  - `huginn-lab-attacker`: trusted for jobs in the `lab-replay` GitHub environment. Contributor on
+    `huginn-lab-rg` only, and never in the watchlist.
+- **Inputs:** tenant and subscription IDs, region, the GitHub repository with its numeric owner
+  and repository IDs, the replay environment name.
+- **Not created here:** the `lab-replay` environment and the repository variables in GitHub (see
+  Quick start).
+- **Re-apply when:** the repository is renamed or moved, because the OIDC subjects contain it.
+- **Docs:** [ADR 0003](docs/adr/0003-oidc-identities-and-state.md),
+  [infra/shared/README.md](infra/shared/README.md).
+
+#### `infra/sentinel`
+
+- **Creates:** the workspace `law-huginn` (0.5 GB/day cap, 30-day retention) with Sentinel; the
+  subscription Activity log setting `huginn-activity-to-law`; the optional Entra setting
+  `huginn-entra-to-law`; the workspace function `HuginnActivity`; the watchlist
+  `HuginnTrustedAutomation`; one scheduled rule per `detections/*/*/rule.yaml` that is
+  `deployable` and listed in `enabled_rules`.
+- **Variables you change** (in `huginn.auto.tfvars.json`): `enabled_rules`, `disabled_rules`,
+  `trusted_operators` (people who run Terraform locally, each with an expiry). Also
+  `daily_quota_gb` (raise it for a purple-team run) and `enable_entra_logs` (needs Entra ID P1/P2
+  and a Global or Security Administrator).
+- **Outputs:** `deployed_rules` and `skipped_rules`, so a plan shows which rule folders were left out.
+- **Good to know:** Terraform overwrites rule edits made in the portal. Each rule's ID is a GUID
+  derived from its rule ID, so renaming a rule never recreates it.
+- **Docs:** [ADR 0001](docs/adr/0001-detections-as-code.md),
+  [ADR 0006](docs/adr/0006-licence-tiers.md), [ADR 0007](docs/adr/0007-watchlist-not-client-app-exclusions.md),
+  [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+#### `infra/lab`
+
+- **Creates, always on:** a user-assigned identity, a Logic App with an HTTP trigger (X-13), a
+  storage account (P-12), and the VNet, subnet and NSG for the X-08 VM. The VM itself is created
+  and deleted by each run, not by Terraform.
+- **Opt-in:** `enable_appservice` (F1 plan and web app, X-10), `enable_aci` (container group,
+  X-14), `enable_acr` (registry, P-13). All off by default.
+- **Who acts on it:** `evidence.yml` uses the Logic App and storage account it creates.
+  `replay.yml` creates fresh, uniquely named resources next to them on every run, so the
+  "new pair" rules see a new pair each time.
+- **Docs:** [ADR 0005](docs/adr/0005-replays-fresh-resources-and-dedup.md),
+  [COST.md](docs/COST.md), [TESTING.md](docs/TESTING.md).
+
+#### `infra/purple`
+
+- **Creates:** its own resource group `huginn-purple-rg`; a VM (Azure Monitor Agent and Syslog), a
+  web app, a Logic App, a container group, an Automation account, a storage account, a registry
+  and a Key Vault; one user-assigned identity on every host; canary secrets in the storage
+  account, Key Vault and Automation account; `allLogs` diagnostic settings on every resource,
+  sent to `law-huginn`.
+- **Attacker:** a dedicated Entra user that you create yourself and pass as `attacker_object_id`.
+  The stack only grants it Contributor on `huginn-purple-rg`.
+- **Opt-in:** `enable_defender_arm` turns on Defender for Resource Manager for the whole
+  subscription. It is paid after the trial, so turn it off after the run.
+- **Lifecycle:** written, not yet applied. Apply, run, capture (`make purple-capture`), then
+  `make purple-destroy` the same day.
+- **Docs:** [ADR 0008](docs/adr/0008-purple-environment.md), [PURPLE-TEAM.md](docs/PURPLE-TEAM.md).
+
 ## Quick start
 
 Prerequisites: Terraform >= 1.6, Azure CLI with the `log-analytics` extension, Python 3.11+,
@@ -190,7 +270,7 @@ About 0 USD per month always on (Activity log ingestion is free; no always-on co
 replay with the VM costs well under 1 US cent. Details: [docs/COST.md](docs/COST.md).
 
 ```bash
-make destroy    # removes the lab and the Sentinel stack (asks first); bootstrap is kept (~0 cost)
+make destroy    # removes purple (if initialised), the lab and the Sentinel stack (asks first); bootstrap is kept (~0 cost)
 ```
 
 ## Naming
