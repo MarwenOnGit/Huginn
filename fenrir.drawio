@@ -1,0 +1,290 @@
+<mxfile host="app.diagrams.net" agent="5.0" version="24.0.0">
+  <diagram id="fenrir-usecase" name="Use case diagram">
+    <mxGraphModel dx="1000" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="Fenrir — use case diagram (Azure identity enumeration &amp; managed-identity exploitation)" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="280" y="6" width="840" height="28" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="actor" value="Operator&#xa;(pentester / attacker)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="20" y="300" width="80" height="160" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="bnd" value="Fenrir" style="swimlane;startSize=34;fillColor=#f8f8f8;strokeColor=#6c8ebf;html=1;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="40" width="840" height="740" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p1" value="1 · Authentication &amp; session" style="swimlane;startSize=26;fillColor=#e8f4f8;strokeColor=#6c8ebf;html=1;fontStyle=1;" vertex="1" parent="bnd">
+          <mxGeometry x="20" y="40" width="800" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc1" value="Authenticate&#xa;(device-code / interactive / ROPC)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="p1">
+          <mxGeometry x="40" y="45" width="270" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc2" value="Check status /&#xa;get token / logout" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="p1">
+          <mxGeometry x="360" y="45" width="270" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p2" value="2 · Enumerate (recon &amp; readiness)" style="swimlane;startSize=26;fillColor=#fff9e6;strokeColor=#d6b656;html=1;fontStyle=1;" vertex="1" parent="bnd">
+          <mxGeometry x="20" y="200" width="800" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc3" value="Enumerate tenant&#xa;(Graph + ARM)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="p2">
+          <mxGeometry x="40" y="45" width="270" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc4" value="Assess exploit-&#xa;readiness verdict" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="p2">
+          <mxGeometry x="360" y="45" width="270" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p3" value="3 · Exploit (managed-identity token extraction)" style="swimlane;startSize=26;fillColor=#e8f5e9;strokeColor=#82b366;html=1;fontStyle=1;" vertex="1" parent="bnd">
+          <mxGeometry x="20" y="360" width="800" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc5" value="Discover resources&#xa;&amp; RBAC" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="p3">
+          <mxGeometry x="40" y="45" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc6" value="Extract MI tokens&#xa;via compute hosts" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="p3">
+          <mxGeometry x="300" y="45" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc7" value="Cross-reference&#xa;user-assigned MIs" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="p3">
+          <mxGeometry x="560" y="45" width="210" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p4" value="4 · Post-exploit (enumerate &amp; harvest as the stolen identity)" style="swimlane;startSize=26;fillColor=#fce4ec;strokeColor=#b85450;html=1;fontStyle=1;" vertex="1" parent="bnd">
+          <mxGeometry x="20" y="520" width="800" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc8" value="Enumerate tenant as&#xa;the stolen identity" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="p4">
+          <mxGeometry x="40" y="45" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc9" value="Harvest blobs /&#xa;Azure Files" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="p4">
+          <mxGeometry x="300" y="45" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc10" value="Pull container&#xa;images" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="p4">
+          <mxGeometry x="560" y="45" width="210" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ext-oauth" value="Azure AD (OAuth)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="70" width="250" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="ext-graph" value="Microsoft Graph" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="200" width="250" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="ext-arm" value="Azure Resource Manager (ARM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="330" width="250" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="ext-imds" value="Compute hosts → IMDS&#xa;(VMs · App Service · Logic Apps ·&#xa;Container Groups · Automation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="460" width="250" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="ext-data" value="Storage &amp; Container Registries&#xa;(blobs · Azure Files · images)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="590" width="250" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lg" value="Legend&#xa;─ association / flow" style="text;html=1;fontSize=10;align=left;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="720" width="250" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-op1" edge="1" parent="1" source="actor" target="uc1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op2" edge="1" parent="1" source="actor" target="uc2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op3" edge="1" parent="1" source="actor" target="uc3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op4" edge="1" parent="1" source="actor" target="uc4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op5" edge="1" parent="1" source="actor" target="uc5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op6" edge="1" parent="1" source="actor" target="uc6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op7" edge="1" parent="1" source="actor" target="uc7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op8" edge="1" parent="1" source="actor" target="uc8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op9" edge="1" parent="1" source="actor" target="uc9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-op10" edge="1" parent="1" source="actor" target="uc10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-oauth-uc1" value="OAuth token" edge="1" parent="1" source="ext-oauth" target="uc1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-oauth-uc2" value="token / refresh" edge="1" parent="1" source="ext-oauth" target="uc2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-graph-uc3" value="users, roles, apps" edge="1" parent="1" source="ext-graph" target="uc3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-graph-uc8" value="identity context" edge="1" parent="1" source="ext-graph" target="uc8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-arm-uc3" value="subs / RGs / resources" edge="1" parent="1" source="ext-arm" target="uc3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-arm-uc5" value="RBAC + resource listing" edge="1" parent="1" source="ext-arm" target="uc5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-arm-uc8" value="role assignments" edge="1" parent="1" source="ext-arm" target="uc8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-imds-uc6" value="RunCommand / Kudu / exec / IMDS" edge="1" parent="1" source="ext-imds" target="uc6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-imds-uc7" value="attach + impersonate UAI" edge="1" parent="1" source="ext-imds" target="uc7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-data-uc9" value="list + download blobs/files" edge="1" parent="1" source="ext-data" target="uc9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-data-uc10" value="list + pull images" edge="1" parent="1" source="ext-data" target="uc10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="fenrir-cli-internals" name="CLI internals">
+    <mxGraphModel dx="1000" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="cli" value="fenrir — typer app&#xa;(src/fenrir/cli.py)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="40" width="220" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="cmd-login" value="login" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd-logout" value="logout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="160" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd-status" value="status" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="420" y="160" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd-token" value="token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="610" y="160" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd-enum" value="enumerate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="800" y="160" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd-exploit" value="exploit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="990" y="160" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd-post" value="post-exploit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="160" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="eng-auth" value="core/authenticator.py&#xa;MSAL · token cache" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="eng-enum" value="core/enumerate/&#xa;collector · verdict" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="230" y="300" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="eng-orch" value="exploit/orchestrator.py&#xa;discovery · IMDS extraction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="300" width="190" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="eng-post" value="exploit/post_exploit.py&#xa;identity_enum · capabilities" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="630" y="300" width="190" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="eng-state" value="state.py + token_cache.py&#xa;(JSON persistence)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="840" y="300" width="190" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="svc-ad" value="Azure AD (OAuth)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="460" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc-graph" value="Microsoft Graph" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="460" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc-arm" value="Azure Resource Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="420" y="460" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc-imds" value="Compute hosts → IMDS&#xa;(RunCommand · Kudu · exec)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="630" y="460" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc-data" value="Storage / ACR&#xa;(blobs · files · images)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="460" width="190" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-cli-login" edge="1" parent="1" source="cli" target="cmd-login" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cli-logout" edge="1" parent="1" source="cli" target="cmd-logout" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cli-status" edge="1" parent="1" source="cli" target="cmd-status" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cli-token" edge="1" parent="1" source="cli" target="cmd-token" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cli-enum" edge="1" parent="1" source="cli" target="cmd-enum" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cli-exploit" edge="1" parent="1" source="cli" target="cmd-exploit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-cli-post" edge="1" parent="1" source="cli" target="cmd-post" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-login-auth" edge="1" parent="1" source="cmd-login" target="eng-auth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-logout-auth" edge="1" parent="1" source="cmd-logout" target="eng-auth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-status-auth" edge="1" parent="1" source="cmd-status" target="eng-auth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-token-auth" edge="1" parent="1" source="cmd-token" target="eng-auth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-enum-eng" edge="1" parent="1" source="cmd-enum" target="eng-enum" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-exploit-orch" edge="1" parent="1" source="cmd-exploit" target="eng-orch" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-post-post" edge="1" parent="1" source="cmd-post" target="eng-post" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-orch-state" value="save / resume" edge="1" parent="1" source="eng-orch" target="eng-state" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-post-state" value="cached tokens" edge="1" parent="1" source="eng-post" target="eng-state" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-auth-ad" edge="1" parent="1" source="eng-auth" target="svc-ad" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-enum-graph" value="Graph API" edge="1" parent="1" source="eng-enum" target="svc-graph" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-enum-arm" value="ARM" edge="1" parent="1" source="eng-enum" target="svc-arm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-orch-imds" value="token extraction" edge="1" parent="1" source="eng-orch" target="svc-imds" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-post-arm" value="as stolen identity" edge="1" parent="1" source="eng-post" target="svc-arm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-post-data" value="harvest" edge="1" parent="1" source="eng-post" target="svc-data" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
